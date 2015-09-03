@@ -30,11 +30,23 @@ if(httpConnection.status_code == HTTP_STATUS_CODES['SUCCESS']):
     tweetsGathered = 0
     timeWaited = 0
     # only works if the file isn't already in use
+    
+    print("Opening " + TARGET_FILE + "...")
+    
     try:
         saveFile = open(TARGET_FILE, 'x')
-    except BaseException:
-        saveFile = open(TARGET_FILE, 'a')
-
+    except FileExistsError:
+        try: 
+            saveFile = open(TARGET_FILE, 'a')
+        except PermissionError: 
+            print("Unable to open the target file. Please close the file and try again.")
+            raise
+        finally: 
+            httpConnection.close()
+        
+    print("Successfully opened " + TARGET_FILE + ".")
+    
+    print("Gathering tweets...")
     for line in httpConnection.iter_lines():
         if line:
             tweetsGathered += 1
